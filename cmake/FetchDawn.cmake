@@ -70,7 +70,6 @@ if (NOT dawn_POPULATED)
 
     # Ensure all necessary targets are added to the export set
     set(AllDawnTargets
-        core_tables
         dawn_common
         dawn_glfw
         dawn_headers
@@ -81,11 +80,7 @@ if (NOT dawn_POPULATED)
         dawn_wire
         dawncpp
         dawncpp_headers
-        emscripten_bits_gen
-        enum_string_mapping
-        extinst_tables
         webgpu_dawn
-        webgpu_headers_gen
         partition_alloc
         dawn_internal_config
         tint_api
@@ -104,6 +99,9 @@ if (NOT dawn_POPULATED)
             endif()
         endif()
     endforeach()
+
+    # Add include directories to the export set
+    install(DIRECTORY "${dawn_SOURCE_DIR}/include/" DESTINATION include)
 
     # This is likely needed for other targets as well
     # TODO: Notify this upstream (is this still needed?)
