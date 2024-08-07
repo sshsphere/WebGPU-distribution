@@ -71,6 +71,5 @@ endif()
 # Export the webgpu target for use with find_package
 install(EXPORT webgpu-export
     FILE webgpu-config.cmake
-    NAMESPACE webgpu::
     DESTINATION lib/cmake/webgpu
 )
