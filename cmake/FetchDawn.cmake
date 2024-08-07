@@ -1,3 +1,4 @@
+
 # Prevent multiple includes
 if (TARGET dawn_native)
     return()
@@ -7,6 +8,11 @@ include(FetchContent)
 
 FetchContent_Declare(
     dawn
+    #GIT_REPOSITORY https://dawn.googlesource.com/dawn
+    #GIT_TAG        chromium/6536
+    #GIT_SHALLOW ON
+
+    # Manual download mode, even shallower than GIT_SHALLOW ON
     DOWNLOAD_COMMAND
         cd ${FETCHCONTENT_BASE_DIR}/dawn-src &&
         git init &&
@@ -26,7 +32,7 @@ if (NOT dawn_POPULATED)
     # This option replaces depot_tools
     set(DAWN_FETCH_DEPENDENCIES ON)
 
-    # A more minimalistic choice of backend than Dawn's default
+    # A more minimalistic choice of backand than Dawn's default
     if (APPLE)
         set(USE_VULKAN OFF)
         set(USE_METAL ON)
@@ -67,45 +73,151 @@ if (NOT dawn_POPULATED)
     set(TINT_BUILD_AS_OTHER_OS OFF CACHE BOOL "Override OS detection to force building of *_other.cc files")
 
     add_subdirectory(${dawn_SOURCE_DIR} ${dawn_BINARY_DIR} EXCLUDE_FROM_ALL)
-
-    # Ensure all necessary targets are added to the export set
-    set(AllDawnTargets
-        dawn_common
-        dawn_glfw
-        dawn_headers
-        dawn_native
-        dawn_platform
-        dawn_proc
-        dawn_utils
-        dawn_wire
-        dawncpp
-        dawncpp_headers
-        webgpu_dawn
-        partition_alloc
-        dawn_internal_config
-        tint_api
-        SPIRV-Tools-opt
-        tint_lang_core_ir  # Added missing target
-        tint_lang_core_type  # Added missing target
-    )
-
-    foreach (Target ${AllDawnTargets})
-        if (TARGET ${Target})
-            # Is a target...
-            get_property(AliasedTarget TARGET "${Target}" PROPERTY ALIASED_TARGET)
-            if("${AliasedTarget}" STREQUAL "")
-                # ...and is not an alias -> move to the Dawn folder
-                set_property(TARGET ${Target} PROPERTY FOLDER "Dawn")
-                # Add to export set
-                install(TARGETS ${Target} EXPORT webgpu-export)
-            endif()
-        endif()
-    endforeach()
-
-    # Add include directories to the export set
-    install(DIRECTORY "${dawn_SOURCE_DIR}/include/" DESTINATION include)
-
-    # This is likely needed for other targets as well
-    # TODO: Notify this upstream (is this still needed?)
-    target_include_directories(dawn_utils PUBLIC "${CMAKE_BINARY_DIR}/_deps/dawn-src/src")
 endif()
+
+set(AllDawnTargets
+    core_tables
+    dawn_common
+    dawn_glfw
+    dawn_headers
+    dawn_native
+    dawn_platform
+    dawn_proc
+    dawn_utils
+    dawn_wire
+    dawncpp
+    dawncpp_headers
+    emscripten_bits_gen
+    enum_string_mapping
+    extinst_tables
+    webgpu_dawn
+    webgpu_headers_gen
+    
+    tint-format
+    tint-lint
+    tint_api
+    tint_api_common
+    tint_api_options
+    tint_cmd_common
+    tint_cmd_info_cmd
+    tint_cmd_loopy_cmd
+    tint_cmd_remote_compile_cmd
+    tint_cmd_tint_cmd
+    tint_lang_core
+    tint_lang_core_constant
+    tint_lang_core_intrinsic
+    tint_lang_core_ir
+    tint_lang_core_ir_transform
+    tint_lang_core_ir_transform_common
+    tint_lang_core_type
+    tint_lang_glsl_writer
+    tint_lang_glsl_writer_common
+    tint_lang_glsl_writer_printer
+    tint_lang_glsl_writer_ast_printer
+    tint_lang_glsl_writer_ast_raise
+    tint_lang_glsl_writer_raise
+    tint_lang_glsl_validate
+    tint_lang_hlsl_writer_common
+    tint_lang_hlsl_writer_helpers
+    tint_lang_msl
+    tint_lang_msl_intrinsic
+    tint_lang_msl_ir
+    tint_lang_msl_writer_raise
+    tint_lang_spirv
+    tint_lang_spirv_intrinsic
+    tint_lang_spirv_ir
+    tint_lang_spirv_reader_common
+    tint_lang_spirv_reader_lower
+    tint_lang_spirv_type
+    tint_lang_spirv_validate
+    tint_lang_spirv_writer
+    tint_lang_spirv_writer_ast_printer
+    tint_lang_spirv_writer_ast_raise
+    tint_lang_spirv_writer_common
+    tint_lang_spirv_writer_helpers
+    tint_lang_spirv_writer_printer
+    tint_lang_spirv_writer_raise
+    tint_lang_wgsl
+    tint_lang_wgsl_ast
+    tint_lang_wgsl_ast_transform
+    tint_lang_wgsl_common
+    tint_lang_wgsl_features
+    tint_lang_wgsl_helpers
+    tint_lang_wgsl_inspector
+    tint_lang_wgsl_intrinsic
+    tint_lang_wgsl_ir
+    tint_lang_wgsl_program
+    tint_lang_wgsl_reader
+    tint_lang_wgsl_reader_lower
+    tint_lang_wgsl_reader_parser
+    tint_lang_wgsl_reader_program_to_ir
+    tint_lang_wgsl_resolver
+    tint_lang_wgsl_sem
+    tint_lang_wgsl_writer
+    tint_lang_wgsl_writer_ast_printer
+    tint_lang_wgsl_writer_ir_to_program
+    tint_lang_wgsl_writer_raise
+    tint_lang_wgsl_writer_syntax_tree_printer
+    tint_lang_core_common
+    tint_lang_hlsl_writer
+    tint_lang_hlsl_writer_ast_printer
+    tint_lang_hlsl_writer_ast_raise
+    tint_lang_hlsl_writer_printer
+    tint_lang_hlsl_writer_raise
+    tint_utils_bytes
+    tint_utils_cli
+    tint_utils_command
+    tint_utils_containers
+    tint_utils_debug
+    tint_utils_diagnostic
+    tint_utils_file
+    tint_utils_generator
+    tint_utils_ice
+    tint_utils_id
+    tint_utils_macros
+    tint_utils_math
+    tint_utils_memory
+    tint_utils_reflection
+    tint_utils_result
+    tint_utils_rtti
+    tint_utils_socket
+    tint_utils_strconv
+    tint_utils_symbol
+    tint_utils_system
+    tint_utils_text
+    tint_utils_traits
+)
+
+foreach (Target ${AllDawnTargets})
+    if (TARGET ${Target})
+        # Is a target...
+        get_property(AliasedTarget TARGET "${Target}" PROPERTY ALIASED_TARGET)
+        if("${AliasedTarget}" STREQUAL "")
+            # ...and is not an alias -> move to the Dawn folder
+            set_property(TARGET ${Target} PROPERTY FOLDER "Dawn")
+        endif()
+    endif()
+endforeach()
+
+# This is likely needed for other targets as well
+# TODO: Notify this upstream (is this still needed?)
+target_include_directories(dawn_utils PUBLIC "${CMAKE_BINARY_DIR}/_deps/dawn-src/src")
+
+# Installation
+foreach (Target ${AllDawnTargets})
+    if (TARGET ${Target})
+        install(TARGETS ${Target}
+            EXPORT dawnTargets
+            LIBRARY DESTINATION lib
+            ARCHIVE DESTINATION lib
+            RUNTIME DESTINATION bin
+            INCLUDES DESTINATION include
+        )
+    endif()
+endforeach()
+
+install(EXPORT dawnTargets
+    FILE dawnTargets.cmake
+    NAMESPACE dawn::
+    DESTINATION lib/cmake/dawn
+)
