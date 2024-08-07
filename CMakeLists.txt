@@ -1,37 +1,22 @@
-cmake_minimum_required(VERSION 3.0.0...3.24 FATAL_ERROR)
-project(webgpu-backend-dawn VERSION 1.0.0)
+cmake_minimum_required(VERSION 3.20)
+project(WebGPUProject LANGUAGES C CXX)
 
-message(STATUS "Using Dawn backend for WebGPU")
+include(FetchContent)
+
+# FetchContent configuration for Dawn
+FetchContent_Declare(
+  dawn
+  GIT_REPOSITORY https://dawn.googlesource.com/dawn
+  GIT_TAG origin/main
+)
+
+FetchContent_MakeAvailable(dawn)
 
 add_library(webgpu INTERFACE)
+target_include_directories(webgpu INTERFACE "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+                                            "$<INSTALL_INTERFACE:include>")
 
-if (EMSCRIPTEN)
-    target_include_directories(webgpu INTERFACE
-        "$<INSTALL_INTERFACE:include-emscripten>"
-        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include-emscripten>"
-    )
-
-    # This is used to advertise the flavor of WebGPU that this zip provides
-    target_compile_definitions(webgpu INTERFACE WEBGPU_BACKEND_EMSCRIPTEN)
-
-    target_link_options(webgpu INTERFACE
-        -sUSE_WEBGPU # Handle WebGPU symbols
-    )
-else()
-    include(cmake/FetchDawn.cmake)
-
-    target_link_libraries(webgpu INTERFACE webgpu_dawn)
-    target_include_directories(webgpu INTERFACE
-        "$<INSTALL_INTERFACE:include>"
-        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
-        "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/_deps/dawn-src/include>"
-    )
-
-    # This is used to advertise the flavor of WebGPU that this zip provides
-    target_compile_definitions(webgpu INTERFACE WEBGPU_BACKEND_DAWN)
-endif()
-
-# Installation
+# Installation for webgpu target
 install(TARGETS webgpu
     EXPORT webgpuTargets
     INCLUDES DESTINATION include
@@ -42,10 +27,3 @@ install(EXPORT webgpuTargets
     NAMESPACE webgpu::
     DESTINATION lib/cmake/webgpu
 )
-
-install(DIRECTORY include/ DESTINATION include)
-install(DIRECTORY ${CMAKE_BINARY_DIR}/_deps/dawn-src/include/ DESTINATION include)
-
-# Does nothing, as this dawn-based distribution of WebGPU is statically linked
-function(target_copy_webgpu_binaries Target)
-endfunction()
