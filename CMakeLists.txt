@@ -56,6 +56,13 @@ function(target_copy_webgpu_binaries Target)
     # No operation needed for static linkage
 endfunction()
 
+# Collect all Dawn targets to be installed
+set(DawnTargets
+    dawn_native
+    dawn_headers
+    webgpu_dawn
+)
+
 # Install rules
 # Install the interface library
 install(TARGETS webgpu
@@ -63,9 +70,9 @@ install(TARGETS webgpu
     DESTINATION lib
 )
 
-# Install the Dawn library if it's being used
+# Install Dawn library and its dependencies if it's being used
 if (NOT EMSCRIPTEN)
-    install(TARGETS webgpu_dawn
+    install(TARGETS ${DawnTargets}
         EXPORT webgpu-export
         DESTINATION lib
     )
