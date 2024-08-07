@@ -1,27 +1,3 @@
-# This file is part of the "Learn WebGPU for C++" book.
-#   https://eliemichel.github.io/LearnWebGPU
-# 
-# MIT License
-# Copyright (c) 2022-2024 Elie Michel and the wgpu-native authors
-# 
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-# 
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-# 
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
 # Prevent multiple includes
 if (TARGET dawn_native)
 	return()
@@ -31,11 +7,6 @@ include(FetchContent)
 
 FetchContent_Declare(
 	dawn
-	#GIT_REPOSITORY https://dawn.googlesource.com/dawn
-	#GIT_TAG        chromium/6536
-	#GIT_SHALLOW ON
-
-	# Manual download mode, even shallower than GIT_SHALLOW ON
 	DOWNLOAD_COMMAND
 		cd ${FETCHCONTENT_BASE_DIR}/dawn-src &&
 		git init &&
@@ -96,6 +67,14 @@ if (NOT dawn_POPULATED)
 	set(TINT_BUILD_AS_OTHER_OS OFF CACHE BOOL "Override OS detection to force building of *_other.cc files")
 
 	add_subdirectory(${dawn_SOURCE_DIR} ${dawn_BINARY_DIR} EXCLUDE_FROM_ALL)
+
+    # Correctly set interface sources
+    set_target_properties(dawn_native PROPERTIES
+        INTERFACE_SOURCES ""
+    )
+    set_target_properties(dawn_headers PROPERTIES
+        INTERFACE_SOURCES ""
+    )
 endif()
 
 set(AllDawnTargets
@@ -186,7 +165,6 @@ set(AllDawnTargets
 	tint_lang_hlsl_writer_ast_printer
 	tint_lang_hlsl_writer_ast_raise
 	tint_lang_hlsl_writer_printer
-	tint_lang_hlsl_writer_raise
 	tint_utils_bytes
 	tint_utils_cli
 	tint_utils_command
