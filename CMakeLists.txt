@@ -63,6 +63,14 @@ install(TARGETS webgpu
     DESTINATION lib
 )
 
+# Install the Dawn library if it's being used
+if (NOT EMSCRIPTEN)
+    install(TARGETS webgpu_dawn
+        EXPORT webgpu-export
+        DESTINATION lib
+    )
+endif()
+
 # Install the header files
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/
     DESTINATION include
