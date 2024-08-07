@@ -85,6 +85,8 @@ if (NOT dawn_POPULATED)
         dawn_internal_config
         tint_api
         SPIRV-Tools-opt
+        tint_lang_core_ir  # Added missing target
+        tint_lang_core_type  # Added missing target
     )
 
     foreach (Target ${AllDawnTargets})
