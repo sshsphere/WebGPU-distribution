@@ -27,14 +27,24 @@ else()
     # Include the FetchDawn script to download and configure Dawn
     include(cmake/FetchDawn.cmake)
 
+    # Ensure that FetchDawn provides correct paths
+    if (NOT TARGET webgpu_dawn)
+        message(FATAL_ERROR "Failed to find or build the Dawn library. Please check FetchDawn.cmake.")
+    endif()
+
     # Link the Dawn library
     target_link_libraries(webgpu INTERFACE webgpu_dawn)
 
-    # Include the Dawn headers and project-specific headers
-    target_include_directories(webgpu INTERFACE
-        "${CMAKE_CURRENT_SOURCE_DIR}/include"
-        "${CMAKE_BINARY_DIR}/_deps/dawn-src/include"
-    )
+    # Ensure paths do not contain user-specific directories
+    set(DawnIncludeDir "${CMAKE_BINARY_DIR}/_deps/dawn-src/include")
+    if (EXISTS "${DawnIncludeDir}")
+        target_include_directories(webgpu INTERFACE
+            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+            "$<BUILD_INTERFACE:${DawnIncludeDir}>"
+        )
+    else()
+        message(FATAL_ERROR "Dawn include directory does not exist: ${DawnIncludeDir}")
+    endif()
 
     # Define a preprocessor symbol to indicate the WebGPU backend is Dawn
     target_compile_definitions(webgpu INTERFACE WEBGPU_BACKEND_DAWN)
@@ -63,7 +73,7 @@ if (EMSCRIPTEN)
         DESTINATION include
     )
 else()
-    install(DIRECTORY ${CMAKE_BINARY_DIR}/_deps/dawn-src/include/
+    install(DIRECTORY ${DawnIncludeDir}/
         DESTINATION include
     )
 endif()
