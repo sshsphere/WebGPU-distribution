@@ -7,29 +7,35 @@ add_library(webgpu INTERFACE)
 
 if (EMSCRIPTEN)
 
-	target_include_directories(webgpu INTERFACE
-		"${CMAKE_CURRENT_SOURCE_DIR}/include-emscripten"
-	)
+    target_include_directories(webgpu INTERFACE
+        "$<INSTALL_INTERFACE:include>"  # Relative path used in the installed environment
+        "${CMAKE_CURRENT_SOURCE_DIR}/include-emscripten"
+    )
 
-	# This is used to advertise the flavor of WebGPU that this zip provides
-	target_compile_definitions(webgpu INTERFACE WEBGPU_BACKEND_EMSCRIPTEN)
+    # This is used to advertise the flavor of WebGPU that this zip provides
+    target_compile_definitions(webgpu INTERFACE WEBGPU_BACKEND_EMSCRIPTEN)
 
-	target_link_options(webgpu INTERFACE
-		-sUSE_WEBGPU # Handle WebGPU symbols
-	)
+    target_link_options(webgpu INTERFACE
+        -sUSE_WEBGPU # Handle WebGPU symbols
+    )
 
 else (EMSCRIPTEN)
 
-	include(cmake/FetchDawn.cmake)
+    include(cmake/FetchDawn.cmake)
 
-	target_link_libraries(webgpu INTERFACE webgpu_dawn)
-	target_include_directories(webgpu INTERFACE
-		"${CMAKE_CURRENT_SOURCE_DIR}/include"
-		"${CMAKE_BINARY_DIR}/_deps/dawn-src/include"
-	)
+    add_library(webgpu_dawn INTERFACE)
+    target_link_libraries(webgpu_dawn INTERFACE ${DAWN_LIBRARIES})
+    
+    target_link_libraries(webgpu INTERFACE webgpu_dawn)
+    
+    target_include_directories(webgpu INTERFACE
+        "$<INSTALL_INTERFACE:include>"
+        "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+        "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/_deps/dawn-src/include>"
+    )
 
-	# This is used to advertise the flavor of WebGPU that this zip provides
-	target_compile_definitions(webgpu INTERFACE WEBGPU_BACKEND_DAWN)
+    # This is used to advertise the flavor of WebGPU that this zip provides
+    target_compile_definitions(webgpu INTERFACE WEBGPU_BACKEND_DAWN)
 
 endif (EMSCRIPTEN)
 
@@ -38,7 +44,7 @@ function(target_copy_webgpu_binaries Target)
 endfunction()
 
 # Install commands
-install(TARGETS webgpu EXPORT webgpu-targets)
+install(TARGETS webgpu webgpu_dawn EXPORT webgpu-targets)
 install(EXPORT webgpu-targets
     FILE webgpu-targets.cmake
     NAMESPACE webgpu::
