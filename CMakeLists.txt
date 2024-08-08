@@ -15,10 +15,10 @@ if (EMSCRIPTEN)
     target_compile_definitions(webgpu INTERFACE WEBGPU_BACKEND_EMSCRIPTEN)
 
     target_link_options(webgpu INTERFACE
-        -sUSE_WEBGPU # Handle WebGPU symbols
+        -sUSE_WEBGPU
     )
 
-else (EMSCRIPTEN)
+else()
 
     include(cmake/FetchDawn.cmake)
 
@@ -32,7 +32,7 @@ else (EMSCRIPTEN)
 
     target_compile_definitions(webgpu INTERFACE WEBGPU_BACKEND_DAWN)
 
-endif (EMSCRIPTEN)
+endif()
 
 # Install the webgpu library
 install(TARGETS webgpu EXPORT webgpu-targets
@@ -42,7 +42,7 @@ install(TARGETS webgpu EXPORT webgpu-targets
     INCLUDES DESTINATION include
 )
 
-# Install the export set
+# Install the export set for webgpu
 install(EXPORT webgpu-targets
     FILE webgpu-targets.cmake
     NAMESPACE webgpu::
@@ -50,7 +50,7 @@ install(EXPORT webgpu-targets
 )
 
 if (NOT EMSCRIPTEN)
-    # Export dawn-targets
+    # Install Dawn targets
     install(EXPORT dawn-targets
         FILE dawn-targets.cmake
         NAMESPACE dawn::

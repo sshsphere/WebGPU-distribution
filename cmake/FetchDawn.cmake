@@ -183,13 +183,13 @@ set(AllDawnTargets
     tint_utils_traits
 )
 
-# Export dawn-targets only if the targets exist
-install(EXPORT dawn-targets
-    FILE dawn-targets.cmake
-    NAMESPACE dawn::
-    DESTINATION lib/cmake/dawn
-    EXPORT_LINK_INTERFACE_LIBRARIES
-)
+if (TARGET webgpu_dawn)
+    install(EXPORT dawn-targets
+        FILE dawn-targets.cmake
+        NAMESPACE dawn::
+        DESTINATION lib/cmake/dawn
+    )
+endif()
 
 # Organize targets under the Dawn folder
 foreach (Target ${AllDawnTargets})
