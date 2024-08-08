@@ -7,11 +7,6 @@ include(FetchContent)
 
 FetchContent_Declare(
     dawn
-    #GIT_REPOSITORY https://dawn.googlesource.com/dawn
-    #GIT_TAG        chromium/6536
-    #GIT_SHALLOW ON
-
-    # Manual download mode, even shallower than GIT_SHALLOW ON
     DOWNLOAD_COMMAND
         cd ${FETCHCONTENT_BASE_DIR}/dawn-src &&
         git init &&
@@ -28,10 +23,9 @@ FetchContent_GetProperties(dawn)
 if (NOT dawn_POPULATED)
     FetchContent_Populate(dawn)
 
-    # This option replaces depot_tools
+    # Set options before adding the subdirectory
     set(DAWN_FETCH_DEPENDENCIES ON)
 
-    # A more minimalistic choice of backend than Dawn's default
     if (APPLE)
         set(USE_VULKAN OFF)
         set(USE_METAL ON)
@@ -39,6 +33,7 @@ if (NOT dawn_POPULATED)
         set(USE_VULKAN ON)
         set(USE_METAL OFF)
     endif()
+    
     set(DAWN_ENABLE_D3D11 OFF CACHE BOOL "Enable compilation of the D3D11 backend")
     set(DAWN_ENABLE_D3D12 OFF CACHE BOOL "Enable compilation of the D3D12 backend")
     set(DAWN_ENABLE_METAL ${USE_METAL} CACHE BOOL "Enable compilation of the Metal backend")
@@ -71,6 +66,7 @@ if (NOT dawn_POPULATED)
     set(TINT_BUILD_BENCHMARKS OFF CACHE BOOL "Build Tint benchmarks")
     set(TINT_BUILD_AS_OTHER_OS OFF CACHE BOOL "Override OS detection to force building of *_other.cc files")
 
+    # Add Dawn to the build
     add_subdirectory(${dawn_SOURCE_DIR} ${dawn_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
@@ -185,6 +181,14 @@ set(AllDawnTargets
     tint_utils_system
     tint_utils_text
     tint_utils_traits
+)
+
+# Export dawn-targets only if the targets exist
+install(EXPORT dawn-targets
+    FILE dawn-targets.cmake
+    NAMESPACE dawn::
+    DESTINATION lib/cmake/dawn
+    EXPORT_LINK_INTERFACE_LIBRARIES
 )
 
 # Organize targets under the Dawn folder

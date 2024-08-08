@@ -34,18 +34,23 @@ else (EMSCRIPTEN)
 
 endif (EMSCRIPTEN)
 
-# Install webgpu library
-install(TARGETS webgpu EXPORT webgpu-targets)
+# Install the webgpu library
+install(TARGETS webgpu EXPORT webgpu-targets
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin
+    INCLUDES DESTINATION include
+)
+
+# Install the export set
+install(EXPORT webgpu-targets
+    FILE webgpu-targets.cmake
+    NAMESPACE webgpu::
+    DESTINATION lib/cmake/webgpu
+)
 
 if (NOT EMSCRIPTEN)
-    # Ensure webgpu_dawn is included in the export set
-    install(EXPORT webgpu-targets
-        FILE webgpu-targets.cmake
-        NAMESPACE webgpu::
-        DESTINATION lib/cmake/webgpu
-    )
-
-    # Export dawn targets properly
+    # Export dawn-targets
     install(EXPORT dawn-targets
         FILE dawn-targets.cmake
         NAMESPACE dawn::
