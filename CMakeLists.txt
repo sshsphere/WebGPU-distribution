@@ -23,9 +23,7 @@ else (EMSCRIPTEN)
 
     include(cmake/FetchDawn.cmake)
 
-    add_library(webgpu_dawn INTERFACE)
-    target_link_libraries(webgpu_dawn INTERFACE ${DAWN_LIBRARIES})
-    
+    # Link to the existing webgpu_dawn target
     target_link_libraries(webgpu INTERFACE webgpu_dawn)
     
     target_include_directories(webgpu INTERFACE
@@ -44,7 +42,7 @@ function(target_copy_webgpu_binaries Target)
 endfunction()
 
 # Install commands
-install(TARGETS webgpu webgpu_dawn EXPORT webgpu-targets)
+install(TARGETS webgpu EXPORT webgpu-targets)
 install(EXPORT webgpu-targets
     FILE webgpu-targets.cmake
     NAMESPACE webgpu::
