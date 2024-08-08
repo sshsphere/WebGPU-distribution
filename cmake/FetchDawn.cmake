@@ -187,17 +187,12 @@ set(AllDawnTargets
     tint_utils_traits
 )
 
+# Organize targets under the Dawn folder
 foreach (Target ${AllDawnTargets})
     if (TARGET ${Target})
-        # Is a target...
         get_property(AliasedTarget TARGET "${Target}" PROPERTY ALIASED_TARGET)
         if("${AliasedTarget}" STREQUAL "")
-            # ...and is not an alias -> move to the Dawn folder
             set_property(TARGET ${Target} PROPERTY FOLDER "Dawn")
         endif()
     endif()
 endforeach()
-
-# This is likely needed for other targets as well
-# TODO: Notify this upstream (is this still needed?)
-target_include_directories(dawn_utils PUBLIC "${CMAKE_BINARY_DIR}/_deps/dawn-src/src")

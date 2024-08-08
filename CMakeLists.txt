@@ -8,11 +8,10 @@ add_library(webgpu INTERFACE)
 if (EMSCRIPTEN)
 
     target_include_directories(webgpu INTERFACE
-        "$<INSTALL_INTERFACE:include>"  # Relative path used in the installed environment
+        "$<INSTALL_INTERFACE:include>"
         "${CMAKE_CURRENT_SOURCE_DIR}/include-emscripten"
     )
 
-    # This is used to advertise the flavor of WebGPU that this zip provides
     target_compile_definitions(webgpu INTERFACE WEBGPU_BACKEND_EMSCRIPTEN)
 
     target_link_options(webgpu INTERFACE
@@ -23,34 +22,30 @@ else (EMSCRIPTEN)
 
     include(cmake/FetchDawn.cmake)
 
-    # Link to the existing webgpu_dawn target
     target_link_libraries(webgpu INTERFACE webgpu_dawn)
-    
+
     target_include_directories(webgpu INTERFACE
         "$<INSTALL_INTERFACE:include>"
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
         "$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/_deps/dawn-src/include>"
     )
 
-    # This is used to advertise the flavor of WebGPU that this zip provides
     target_compile_definitions(webgpu INTERFACE WEBGPU_BACKEND_DAWN)
 
 endif (EMSCRIPTEN)
 
-# Does nothing, as this dawn-based distribution of WebGPU is statically linked
-function(target_copy_webgpu_binaries Target)
-endfunction()
-
-# Install commands
+# Install webgpu library
 install(TARGETS webgpu EXPORT webgpu-targets)
-install(EXPORT webgpu-targets
-    FILE webgpu-targets.cmake
-    NAMESPACE webgpu::
-    DESTINATION lib/cmake/webgpu
-)
 
-if(NOT EMSCRIPTEN)
-    # Install all Dawn targets using install(EXPORT)
+if (NOT EMSCRIPTEN)
+    # Ensure webgpu_dawn is included in the export set
+    install(EXPORT webgpu-targets
+        FILE webgpu-targets.cmake
+        NAMESPACE webgpu::
+        DESTINATION lib/cmake/webgpu
+    )
+
+    # Export dawn targets properly
     install(EXPORT dawn-targets
         FILE dawn-targets.cmake
         NAMESPACE dawn::
@@ -58,7 +53,7 @@ if(NOT EMSCRIPTEN)
     )
 endif()
 
-# Install the include directories
+# Install include directories
 if (EMSCRIPTEN)
     install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include-emscripten"
             DESTINATION include)
