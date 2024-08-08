@@ -23,8 +23,11 @@ else (EMSCRIPTEN)
 
     include(cmake/FetchDawn.cmake)
 
+    # Ensure the webgpu_dawn target is available for export
+    include(${CMAKE_BINARY_DIR}/dawn-targets.cmake)
+
     # Link to the existing webgpu_dawn target
-    target_link_libraries(webgpu INTERFACE webgpu_dawn)
+    target_link_libraries(webgpu INTERFACE dawn::webgpu_dawn)
     
     target_include_directories(webgpu INTERFACE
         "$<INSTALL_INTERFACE:include>"
@@ -41,11 +44,21 @@ endif (EMSCRIPTEN)
 function(target_copy_webgpu_binaries Target)
 endfunction()
 
-# Install commands - only install headers and configuration, not the webgpu target itself
-install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include"
-        DESTINATION include)
+# Install commands
+install(TARGETS webgpu EXPORT webgpu-targets)
+install(EXPORT webgpu-targets
+    FILE webgpu-targets.cmake
+    NAMESPACE webgpu::
+    DESTINATION lib/cmake/webgpu
+)
 
-if (NOT EMSCRIPTEN)
+# Install the include directories
+if (EMSCRIPTEN)
+    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include-emscripten"
+            DESTINATION include)
+else()
+    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include"
+            DESTINATION include)
     install(DIRECTORY "${CMAKE_BINARY_DIR}/_deps/dawn-src/include"
             DESTINATION include/dawn)
 endif()
