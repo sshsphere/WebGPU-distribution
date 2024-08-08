@@ -41,21 +41,11 @@ endif (EMSCRIPTEN)
 function(target_copy_webgpu_binaries Target)
 endfunction()
 
-# Install commands
-install(TARGETS webgpu EXPORT webgpu-targets)
-install(EXPORT webgpu-targets
-    FILE webgpu-targets.cmake
-    NAMESPACE webgpu::
-    DESTINATION lib/cmake/webgpu
-)
+# Install commands - only install headers and configuration, not the webgpu target itself
+install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include"
+        DESTINATION include)
 
-# Install the include directories
-if (EMSCRIPTEN)
-    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include-emscripten"
-            DESTINATION include)
-else()
-    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include"
-            DESTINATION include)
+if (NOT EMSCRIPTEN)
     install(DIRECTORY "${CMAKE_BINARY_DIR}/_deps/dawn-src/include"
             DESTINATION include/dawn)
 endif()
